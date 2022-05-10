@@ -19,6 +19,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "slave" do |slave|
     slave.vm.box = "ubuntu/xenial64"
     slave.vm.network "private_network", ip: "192.168.56.102"
+    slave.vm.network "forwarded_port", guest: 8081, host: 8081
     slave.vm.provider "virtualbox" do |vb|
       vb.gui = false
       vb.memory = "2048"
