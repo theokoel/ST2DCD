@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
       vb.gui = false
       vb.memory = "2048"
     end
-    slave.vm.synced_folder "./data", "/home/vagrant"
+    slave.vm.synced_folder "./data", "/home/vagrant/data"
     slave.vm.provision "shell", inline: <<-SHELL
       apt-get update
     SHELL
