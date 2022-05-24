@@ -27,6 +27,8 @@ Vagrant.configure("2") do |config|
     slave.vm.synced_folder "./data", "/home/vagrant/data"
     slave.vm.provision "shell", inline: <<-SHELL
       apt-get update
+      add-apt-repository --yes --update ppa:ansible/ansible
+      apt-get install docker.io docker-compose software-properties-common ansible default-jre default-jdk git git-ftp -y
     SHELL
   end
 
