@@ -1,0 +1,19 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.define "runner" do |runner|
+    runner.vm.box = "ubuntu/xenial64"
+    runner.vm.network "private_network", ip: "192.168.56.101"
+    runner.vm.synced_folder "./data", "/home/vagrant/data"
+    runner.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.memory = "2048"
+    end
+    runner.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y docker.io docker-compose
+      docker-compose -f /home/vagrant/data/docker-compose.yml up -d
+      # docker exec -it runner gitlab-runner register
+    SHELL
+  end
+
+end
