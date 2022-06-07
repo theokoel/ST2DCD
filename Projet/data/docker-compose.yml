@@ -2,33 +2,49 @@ version: "2"
 
 services:
 
-  gitlab:
-    container_name: gitlab
-    image: gitlab/gitlab-ee
-    restart: always
-    hostname: 'gitlab.example.com'
-    environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.example.com'
-        # Add any other gitlab.rb configuration here, each on its own line
-    ports:
-      - '80:80'
-      - '443:443'
-      - '22:22'
-    volumes:
-      - '/srv/gitlab/config:/etc/gitlab'
-      - '/srv/gitlab/logs:/var/log/gitlab'
-      - '/srv/gitlab/data:/var/opt/gitlab'
-    shm_size: '256m'
-
-
-  gitlab-runner:
+  runner:
     container_name: runner
     image: 'gitlab/gitlab-runner'
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - gitlab-runner-config:/etc/gitlab-runner
+
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/vhost.d
+      - /etc/nginx/certs
+      - /usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      - DEFAULT_HOST=localhost
+
+  ssl-generator:
+    container_name: ssl-generator
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from:
+      - nginx-proxy
+
+  hello:
+    container_name: hello-world-unit-test
+    image: nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - /home/deployer/hello-world-unit-test:/usr/share/nginx/html
+    environment:
+      - VIRTUAL_HOST=192.168.56.103
+      - LETSENCRYPT_HOST=192.168.56.103
 
 volumes:
   gitlab-runner-config:
